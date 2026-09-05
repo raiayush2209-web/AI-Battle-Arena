@@ -1,5 +1,6 @@
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph"
-import { mistralAIModel, cohereModel, judgeModel } from "./model.ai.js";
+//import { mistralAIModel, cohereModel, judgeModel } from "./model.ai.js";
+import { geminiAIModel, cohereModel, judgeModel } from "./model.ai.js";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
 const StateAnnotation = Annotation.Root({
@@ -27,16 +28,59 @@ const StateAnnotation = Annotation.Root({
 });
 
 const solutionNode = async (state: typeof StateAnnotation.State) => {
-    const [mistralResponse, cohereResponse] = await Promise.all([
-        mistralAIModel.invoke(state.problem),
-        cohereModel.invoke(state.problem),
-    ]);
+   const [geminiResult, cohereResult] = await Promise.allSettled([
+    geminiAIModel.invoke(state.problem),
+    cohereModel.invoke(state.problem),
+]);
 
-    return {
-        solution_1: typeof mistralResponse.content === "string" ? mistralResponse.content : JSON.stringify(mistralResponse.content),
-        solution_2: typeof cohereResponse.content === "string" ? cohereResponse.content : JSON.stringify(cohereResponse.content),
-    };
+    const failures: string[] = [];
+   if (geminiResult.status === "rejected") {
+    failures.push(`Gemini: ${getProviderError(geminiResult.reason)}`);
+}
+
+if (cohereResult.status === "rejected") {
+    failures.push(`Cohere: ${getProviderError(cohereResult.reason)}`);
+}
+    if (failures.length > 0) {
+        throw new Error(`AI provider request failed. ${failures.join(" | ")}`);
+    }
+
+  if (geminiResult.status !== "fulfilled" || cohereResult.status !== "fulfilled") {
+    throw new Error("AI provider request failed.");
+}
+
+const geminiResponse = geminiResult.value;
+const cohereResponse = cohereResult.value;
+
+return {
+    solution_1:
+        typeof geminiResponse.content === "string"
+            ? geminiResponse.content
+            : JSON.stringify(geminiResponse.content),
+
+    solution_2:
+        typeof cohereResponse.content === "string"
+            ? cohereResponse.content
+            : JSON.stringify(cohereResponse.content),
 };
+};
+
+function getProviderError(error: unknown): string {
+    const message = error instanceof Error ? error.message : String(error);
+
+    if (message.includes("Status 429") || /rate limit/i.test(message)) {
+        return "rate limit exceeded. Please wait for the quota window to reset.";
+    }
+
+    if (
+        message.includes("Status 401") ||
+        /unauthori[sz]ed|invalid api key/i.test(message)
+    ) {
+        return "authentication failed. Check the API key in Backend/.env and restart the server.";
+    }
+
+    return message;
+}
 
 const judgeNode = async (state: typeof StateAnnotation.State) => {
     const { problem, solution_1, solution_2 } = state;
@@ -55,7 +99,7 @@ You MUST respond ONLY with a valid JSON object (no markdown, no code fences) in 
 }`
         ),
         new HumanMessage(
-            `Problem: ${problem}\n\nSolution 1 (Mistral AI):\n${solution_1}\n\nSolution 2 (Cohere AI):\n${solution_2}\n\nEvaluate both solutions and respond with the JSON.`
+            `Problem: ${problem}\n\nSolution 1 (Gemini AI):\n${solution_1}\n\nSolution 2 (Cohere AI):\n${solution_2}\n\nEvaluate both solutions and respond with the JSON.`
         ),
     ]);
 
