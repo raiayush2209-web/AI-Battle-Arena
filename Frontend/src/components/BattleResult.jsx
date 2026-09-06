@@ -7,7 +7,7 @@ export default function BattleResult({ result, problem }) {
   const sol2Score = result.judge?.solution_2_score;
   const winner = result.judge?.winner;
 
-  const isSol1Winner = winner?.includes("Solution 1") || winner?.includes("Mistral") || winner?.includes("Gemini");
+  const isSol1Winner = winner?.includes("Solution 1") || winner?.includes("Gemini") || winner?.includes("Gemini");
   const isSol2Winner = winner?.includes("Solution 2") || winner?.includes("Cohere");
 
   return (
