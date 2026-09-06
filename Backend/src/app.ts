@@ -3,6 +3,8 @@ import runGraph from "./ai/graph.ai.js"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import authRoutes from "./routes/auth.routes.js"
+import conversationRoutes from "./routes/conversation.routes.js"
+import { authUser } from "./middlewares/auth.middleware.js"
 
 const app = express();
 app.use(express.json())
@@ -12,7 +14,7 @@ app.use(cors({
     "http://localhost:5173",
     "http://localhost:5175"
   ]
-  ,  methods: ["GET", "POST"],
+  ,  methods: ["GET", "POST", "PATCH", "DELETE"],
     credentials: true,
 }))
 
@@ -24,7 +26,7 @@ app.get('/', async (req, res) => {
     res.json(result)
 })
 
-app.post("/invoke", async (req, res) => {
+app.post("/invoke", authUser, async (req, res) => {
     try {
         const { input } = req.body
 
@@ -50,5 +52,6 @@ app.post("/invoke", async (req, res) => {
 })
 
 app.use("/api/auth", authRoutes)
+app.use("/api/conversations", conversationRoutes)
 
 export default app;
