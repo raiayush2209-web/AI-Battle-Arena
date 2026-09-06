@@ -3,6 +3,15 @@ import UserModel  from "./../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const tokenCookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
+  maxAge: 3 * 24 * 60 * 60 * 1000,
+} as const;
+
 
 // ✅ Register User
 export async function registerUser(req: Request, res: Response): Promise<Response> {
@@ -49,11 +58,7 @@ export async function registerUser(req: Request, res: Response): Promise<Respons
       { expiresIn: "3d" }
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false, // ✅ for localhost
-      sameSite: "lax",
-    });
+    res.cookie("token", token, tokenCookieOptions);
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -98,11 +103,7 @@ export async function loginUser(req: Request, res: Response): Promise<Response> 
       { expiresIn: "3d" }
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-    });
+    res.cookie("token", token, tokenCookieOptions);
 
     return res.status(200).json({
       message: "User logged in successfully",
@@ -135,8 +136,7 @@ export async function getMe(req: Request, res: Response): Promise<Response> {
 // ✅ Logout User
 export async function logoutUser(req: Request, res: Response): Promise<Response> {
   try {
-    const token = req.cookies.token;
-    res.clearCookie("token");
+    res.clearCookie("token", tokenCookieOptions);
 
    
 
