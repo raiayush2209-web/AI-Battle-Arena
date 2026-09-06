@@ -21,13 +21,12 @@ app.use(cors({
 }))
 
 
-app.get('/', async (req, res) => {
-
-    const result = await runGraph("Write an code for Factorial function in js")
-
-    res.json(result)
-})
-
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "AI Battle Arena backend is running",
+    });
+});
 app.post("/invoke", authUser, async (req, res) => {
     try {
         const { input } = req.body
