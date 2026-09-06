@@ -4,8 +4,8 @@ AI Battle Arena is a full-stack multi-model AI coding platform. An authenticated
 
 ## Live Links
 
-- [Live Demo](YOUR_VERCEL_URL)
-- [GitHub Repository](YOUR_GITHUB_URL)
+- [Live Demo](https://ai-battle-arena-gilt.vercel.app/L)
+- [GitHub Repository](https://github.com/raiayush2209-web/AI-Battle-Arena)
 
 The repository currently contains no deployment manifest or published URL. The backend CORS configuration includes the deployed frontend origin `https://ai-battle-arena-gilt.vercel.app`.
 
