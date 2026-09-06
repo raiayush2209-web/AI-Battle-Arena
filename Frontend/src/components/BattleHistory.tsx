@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getBattlesApi } from '../services/api';
 
 interface Battle {
   _id: string;
@@ -38,14 +39,7 @@ export default function BattleHistory() {
   useEffect(() => {
     async function fetchBattles() {
       try {
-        const response = await fetch('http://localhost:3000/battles');
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          throw new Error(data.message || 'Failed to load battle history');
-        }
-
-        setBattles(data.battles);
+        setBattles(await getBattlesApi());
       } catch (fetchError: any) {
         console.error('[BattleHistory] fetch error', fetchError?.message || fetchError);
         setError('Could not load battle history.');

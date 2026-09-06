@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export async function registerApi(userData) {
   const res = await fetch(`${BASE_URL}/api/auth/register`, {
@@ -61,6 +61,18 @@ export async function invokeBattleApi(question) {
   });
   const data = await res.json();
   return data;
+}
+
+export async function getBattlesApi() {
+  const res = await fetch(`${BASE_URL}/battles`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Failed to load battle history");
+  }
+  return data.battles;
 }
 
 // Conversation APIs
