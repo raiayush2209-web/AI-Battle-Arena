@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AuthProvider } from "./context/AuthContext";
+import { ConversationProvider } from "./context/ConversationContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import BattleArena from "./components/BattleArena";
@@ -18,7 +19,9 @@ function MainContent() {
         )
       }
     >
-      <BattleArena />
+      <ConversationProvider>
+        <BattleArena />
+      </ConversationProvider>
     </ProtectedRoute>
   );
 }

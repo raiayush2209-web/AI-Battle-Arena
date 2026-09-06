@@ -62,3 +62,82 @@ export async function invokeBattleApi(question) {
   const data = await res.json();
   return data;
 }
+
+// Conversation APIs
+export async function getConversationsApi() {
+  const res = await fetch(`${BASE_URL}/api/conversations`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to fetch conversations");
+  }
+  return data;
+}
+
+export async function getConversationApi(id) {
+  const res = await fetch(`${BASE_URL}/api/conversations/${id}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to fetch conversation");
+  }
+  return data;
+}
+
+export async function createConversationApi(title) {
+  const res = await fetch(`${BASE_URL}/api/conversations`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(title ? { title } : {}),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to create conversation");
+  }
+  return data;
+}
+
+export async function updateConversationApi(id, updates) {
+  const res = await fetch(`${BASE_URL}/api/conversations/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(updates),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to update conversation");
+  }
+  return data;
+}
+
+export async function deleteConversationApi(id) {
+  const res = await fetch(`${BASE_URL}/api/conversations/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to delete conversation");
+  }
+  return data;
+}
+
+export async function addBattleMessageApi(id, { userMessage, assistant }) {
+  const res = await fetch(`${BASE_URL}/api/conversations/${id}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ userMessage, assistant }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Failed to save message to conversation");
+  }
+  return data;
+}
